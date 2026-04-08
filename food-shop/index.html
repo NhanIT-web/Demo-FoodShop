@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#E8621A" />
+    <title>Bếp Nhà • Food Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="shell">
+      <header id="nav">
+        <div class="nav-i">
+          <a class="brand" href="./" aria-label="Trang chủ">
+            <div class="brand-ico" aria-hidden="true">🍜</div>
+            <span class="brand-name">Food<span>Shop</span></span>
+          </a>
+
+          <div id="searchbar" role="search">
+            <span class="sico" aria-hidden="true">🔍</span>
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Tìm món ăn yêu thích..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="nav-acts">
+            <button class="nav-btn" type="button" id="ordersBtn">📋 Đơn hàng</button>
+            <a class="nav-btn" href="./login.html" style="display: inline-flex">🔐 Đăng Nhập</a>
+            <button class="cart-btn" type="button" id="cartBtn">
+              🛒 Giỏ hàng <span class="cart-count" id="cartCount">0</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section id="hero">
+        <div class="hero-i">
+          <div class="hero-text">
+            <h1>
+              Món ngon đỉnh cao,<br />
+              <em>giao tận cửa nhà</em>
+            </h1>
+            <p>🕐 Giao hàng 30–45 phút &nbsp;|&nbsp; 🚚 Miễn phí từ 150.000đ</p>
+          </div>
+          <div class="stats" aria-label="Thống kê">
+            <div class="stat-item">
+              <div class="stat-num">2.4k+</div>
+              <div class="stat-lbl">Khách hài lòng</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">4.9★</div>
+              <div class="stat-lbl">Đánh giá</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">35p</div>
+              <div class="stat-lbl">Thời gian giao</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav id="cats" aria-label="Danh mục">
+        <div class="cats-i" id="catBar"></div>
+      </nav>
+
+      <main id="main">
+        <section aria-label="Danh sách món">
+          <div class="sortbar">
+            <div class="sortbar-left">Hiển thị <b id="countLabel">0</b> món</div>
+            <label class="sr-only" for="sortSel">Sắp xếp</label>
+            <select class="sort-sel" id="sortSel">
+              <option value="default">Mặc định</option>
+              <option value="price-asc">Giá tăng dần</option>
+              <option value="price-desc">Giá giảm dần</option>
+              <option value="rating">Đánh giá cao</option>
+              <option value="popular">Phổ biến nhất</option>
+            </select>
+          </div>
+          <div id="menu-grid"></div>
+        </section>
+
+        <div id="cart-overlay" aria-hidden="true"></div>
+        <div id="orders-overlay" aria-hidden="true"></div>
+
+        <section id="orders-modal" aria-label="Đơn hàng" aria-hidden="true">
+          <div class="orders-card" role="dialog" aria-modal="true">
+            <div class="orders-hd">
+              <div class="orders-title">📋 Đơn hàng</div>
+              <div class="orders-actions">
+                <button class="promo-btn" type="button" id="ordersReloadBtn">Tải lại</button>
+                <button class="cart-close" type="button" id="ordersCloseBtn" aria-label="Đóng đơn hàng">✕</button>
+              </div>
+            </div>
+            <div id="ordersList"></div>
+          </div>
+        </section>
+
+        <aside id="cart-panel" aria-label="Giỏ hàng" aria-hidden="true">
+          <div id="toast" role="status" aria-live="polite"></div>
+          <div class="cart-hd">
+            <div class="cart-title">
+              🛒 Giỏ hàng
+              <span id="cartBadge" class="cart-badge">0</span>
+            </div>
+            <div class="cart-hd-actions">
+              <button class="cart-clear" type="button" id="clearCartBtn">Xóa tất cả</button>
+              <button class="cart-close" type="button" id="cartCloseBtn" aria-label="Đóng giỏ hàng">✕</button>
+            </div>
+          </div>
+          <div id="cart-items"></div>
+
+          <div class="promo-row">
+            <label class="sr-only" for="promoInput">Mã giảm giá</label>
+            <input class="promo-input" id="promoInput" type="text" placeholder="Mã giảm giá..." />
+            <button class="promo-btn" type="button" id="applyPromoBtn">Áp dụng</button>
+          </div>
+          <div class="promo-ok" id="promoOk">✓ Giảm 15% đã áp dụng</div>
+
+          <div class="summary">
+            <div class="sum-row"><span>Tạm tính</span><span id="subTotal">0đ</span></div>
+            <div class="sum-row disc" id="discRow" style="display: none">
+              <span>Giảm giá</span><span id="discAmt">-0đ</span>
+            </div>
+            <div class="sum-row"><span>Phí giao hàng</span><span id="shipFee">30.000đ</span></div>
+            <div class="sum-row total"><span>Tổng cộng</span><span id="grandTotal">0đ</span></div>
+          </div>
+          <div class="ship-note" id="shipNote"></div>
+
+          <div class="form-sep">
+            <div class="form-title">📍 Thông tin giao hàng</div>
+            <div class="fg"><label for="fName">Họ tên</label><input id="fName" type="text" placeholder="Nguyễn Văn A" /></div>
+            <div class="fg"><label for="fPhone">Số điện thoại</label><input id="fPhone" type="tel" inputmode="tel" placeholder="0901 234 567" /></div>
+            <div class="fg"><label for="fAddr">Địa chỉ</label><input id="fAddr" type="text" placeholder="123 Đường Lê Lợi, Q.1, TP.HCM" /></div>
+            <div class="fg"><label for="fNote">Ghi chú</label><input id="fNote" type="text" placeholder="Ít đá, không hành..." /></div>
+          </div>
+
+          <div>
+            <div class="form-title">💳 Thanh toán</div>
+            <div class="pay-opts" id="payOpts">
+              <button class="pay-opt sel" type="button" data-mode="cod">
+                <div class="pico">💵</div>
+                <div class="plbl">Tiền mặt</div>
+              </button>
+              <button class="pay-opt" type="button" data-mode="card">
+                <div class="pico">💳</div>
+                <div class="plbl">Thẻ ngân hàng</div>
+              </button>
+              <button class="pay-opt" type="button" data-mode="momo">
+                <div class="pico">📱</div>
+                <div class="plbl">MoMo</div>
+              </button>
+              <button class="pay-opt" type="button" data-mode="vnpay">
+                <div class="pico">🏦</div>
+                <div class="plbl">VNPay</div>
+              </button>
+            </div>
+            <button class="btn-checkout" id="checkoutBtn" type="button">Đặt hàng ngay →</button>
+          </div>
+
+          <section id="success-modal" aria-label="Thông báo đặt hàng">
+            <div class="modal-card" role="dialog" aria-modal="true">
+              <div class="modal-ico" aria-hidden="true">🎉</div>
+              <div class="modal-title">Đặt hàng thành công!</div>
+              <div class="modal-sub" id="modalSub"></div>
+              <div class="track-steps">
+                <div class="ts done"><div class="ts-dot">✓</div>Nhận đơn</div>
+                <div class="ts done"><div class="ts-dot">✓</div>Xác nhận</div>
+                <div class="ts"><div class="ts-dot">🍳</div>Chế biến</div>
+                <div class="ts"><div class="ts-dot">🛵</div>Giao hàng</div>
+                <div class="ts"><div class="ts-dot">🏠</div>Nhận hàng</div>
+              </div>
+              <div class="order-info" id="orderInfo"></div>
+              <button class="btn-back" id="resetBtn" type="button">Tiếp tục mua sắm</button>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin • Đơn hàng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="shell">
+      <header id="nav">
+        <div class="nav-i">
+          <a class="brand" href="./" aria-label="Trang chủ">
+            <div class="brand-ico" aria-hidden="true">🧾</div>
+            <span class="brand-name">Admin <span>Orders</span></span>
+          </a>
+          <div class="nav-acts">
+            <a class="nav-btn" href="./admin.html" style="display: inline-flex">👥 Users</a>
+            <a class="nav-btn" href="./" style="display: inline-flex">← Shop</a>
+            <button class="nav-btn" id="logoutBtn" type="button">Đăng xuất</button>
+          </div>
+        </div>
+      </header>
+
+      <main style="max-width: 1200px; margin: 0 auto; padding: 1.25rem">
+        <section class="hero-i" style="padding: 1rem 1.1rem; align-items: center">
+          <div class="hero-text">
+            <h1 style="font-size: 1.5rem">Quản lý đơn hàng</h1>
+            <p>Admin có quyền thêm / xóa / chỉnh sửa trạng thái và thông tin giao hàng.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end">
+            <button class="cat-btn active" id="refreshBtn" type="button">Tải lại</button>
+          </div>
+        </section>
+
+        <section class="modal-card" style="max-width: none; text-align: left; margin-top: 1rem">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+            <div class="form-title">📦 Danh sách đơn</div>
+            <div style="color: var(--tx3); font-weight: 900" id="count"></div>
+          </div>
+          <div id="list" style="margin-top: 0.5rem"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const el = (id) => document.getElementById(id);
+      const statuses = ["new", "confirmed", "cooking", "delivering", "done", "cancelled"];
+
+      async function api(path, opts) {
+        const r = await fetch(path, opts);
+        if (r.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || "request_failed");
+        return j;
+      }
+
+      function money(n) {
+        return Math.round(Number(n) || 0).toLocaleString("vi-VN") + "đ";
+      }
+
+      function row(o) {
+        const items = Array.isArray(o.items) ? o.items : [];
+        const topItems = items
+          .slice(0, 3)
+          .map((x) => `${x.name} x${x.qty}`)
+          .join(", ");
+        const more = items.length > 3 ? ` +${items.length - 3} món` : "";
+        const statusOpts = statuses
+          .map((s) => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`)
+          .join("");
+
+        return `
+          <div class="ci" style="border-bottom: 1px solid var(--bd); align-items: flex-start">
+            <div class="ci-emo" aria-hidden="true">🧾</div>
+            <div class="ci-info">
+              <div class="ci-name">#${o.id} <span style="color:var(--tx3); font-weight:800">(${o.userId})</span></div>
+              <div class="ci-price" style="margin-top: 2px">Tổng: <b style="color:var(--or)">${money(o.totals?.grand)}</b> • ${new Date(o.createdAt).toLocaleString("vi-VN")}</div>
+              <div style="margin-top: 8px; color: var(--tx2); font-weight: 800; line-height: 1.55">
+                <b>Món:</b> ${topItems}${more}<br/>
+                <b>Giao:</b> ${o.shipping?.name || ""} • ${o.shipping?.phone || ""}<br/>
+                <b>Đ/c:</b> ${o.shipping?.addr || ""}<br/>
+                <b>Ghi chú:</b> ${o.shipping?.note || "-"}<br/>
+                <b>Thanh toán:</b> ${o.paymentMode || "cod"}
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap: wrap; margin-top: 10px; align-items:center">
+                <label style="font-weight:950; color:var(--tx2)">Trạng thái</label>
+                <select class="sort-sel" data-act="status" data-id="${o.id}">${statusOpts}</select>
+                <button class="promo-btn" type="button" data-act="editShip" data-id="${o.id}">Sửa giao hàng</button>
+                <button class="promo-btn" type="button" data-act="del" data-id="${o.id}" style="border-color: rgba(192,57,43,.35); color: var(--bad)">Xóa</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      async function load() {
+        const j = await api("/api/admin/orders");
+        el("count").textContent = `${j.orders.length} đơn`;
+        el("list").innerHTML = j.orders.map(row).join("");
+      }
+
+      async function logout() {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/login.html";
+      }
+
+      el("refreshBtn").addEventListener("click", load);
+      el("logoutBtn").addEventListener("click", logout);
+
+      el("list").addEventListener("change", async (e) => {
+        const sel = e.target.closest("[data-act='status'][data-id]");
+        if (!sel) return;
+        const id = sel.dataset.id;
+        const status = sel.value;
+        await api("/api/admin/orders/" + id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+      });
+
+      el("list").addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-act][data-id]");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const act = btn.dataset.act;
+        if (act === "del") {
+          if (!confirm("Xóa đơn hàng này?")) return;
+          await api("/api/admin/orders/" + id, { method: "DELETE" });
+          return load();
+        }
+        if (act === "editShip") {
+          const name = prompt("Tên người nhận:", "");
+          const phone = prompt("Số điện thoại:", "");
+          const addr = prompt("Địa chỉ:", "");
+          const note = prompt("Ghi chú:", "");
+          await api("/api/admin/orders/" + id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ shipping: { name, phone, addr, note } }),
+          });
+          return load();
+        }
+      });
+
+      (async () => {
+        try {
+          const me = await api("/api/auth/me");
+          if (me.user.role !== "admin") window.location.href = "/";
+          await load();
+        } catch {
+          window.location.href = "/login.html";
+        }
+      })();
+    </script>
+  </body>
+</html>
+

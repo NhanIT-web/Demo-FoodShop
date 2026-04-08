@@ -1,0 +1,13 @@
+services:
+  food-shop:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SESSION_SECRET=change-me
+      - ADMIN_EMAIL=admin@local
+      - ADMIN_PASSWORD=admin123
+    volumes:
+      - ./data:/app/data
+

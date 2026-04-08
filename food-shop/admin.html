@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin • Food Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="shell">
+      <header id="nav">
+        <div class="nav-i">
+          <a class="brand" href="./" aria-label="Trang chủ">
+            <div class="brand-ico" aria-hidden="true">🛠️</div>
+            <span class="brand-name">Admin <span>Panel</span></span>
+          </a>
+
+          <div class="nav-acts">
+            <a class="nav-btn" href="./admin-products.html" style="display: inline-flex">🧺 Sản phẩm</a>
+            <a class="nav-btn" href="./admin-orders.html" style="display: inline-flex">🧾 Đơn hàng</a>
+            <a class="nav-btn" href="./" style="display: inline-flex">← Shop</a>
+            <button class="nav-btn" id="logoutBtn" type="button">Đăng xuất</button>
+          </div>
+        </div>
+      </header>
+
+      <main style="max-width: 1200px; margin: 0 auto; padding: 1.25rem">
+        <section class="hero-i" style="padding: 1rem 1.1rem; align-items: center">
+          <div class="hero-text">
+            <h1 style="font-size: 1.5rem">Quản lý người dùng</h1>
+            <p>Admin có thể tạo/sửa/xóa user và reset mật khẩu.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end">
+            <a class="cat-btn" href="./login.html">Trang đăng nhập</a>
+            <button class="cat-btn active" id="refreshBtn" type="button">Tải lại</button>
+          </div>
+        </section>
+
+        <section style="display: grid; grid-template-columns: 1fr 420px; gap: 1rem; margin-top: 1rem" id="grid">
+          <div class="modal-card" style="max-width: none; text-align: left">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+              <div class="form-title">👥 Danh sách users</div>
+              <div style="color: var(--tx3); font-weight: 900" id="count"></div>
+            </div>
+
+            <div id="list" style="margin-top: 0.5rem"></div>
+          </div>
+
+          <div class="modal-card" style="max-width: none; text-align: left">
+            <div class="form-title">➕ Tạo user</div>
+            <div class="fg"><label for="c_email">Email</label><input id="c_email" type="email" placeholder="user@local" /></div>
+            <div class="fg"><label for="c_name">Tên</label><input id="c_name" type="text" placeholder="Nguyễn Văn B" /></div>
+            <div class="fg">
+              <label for="c_role">Role</label>
+              <select id="c_role">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <div class="fg"><label for="c_pass">Mật khẩu</label><input id="c_pass" type="text" placeholder="tối thiểu 4 ký tự" /></div>
+            <div id="msg" style="display: none; margin: 0.5rem 0; font-weight: 900"></div>
+            <button class="btn-checkout" id="createBtn" type="button">Tạo user →</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const el = (id) => document.getElementById(id);
+
+      function showMsg(text, ok) {
+        const m = el("msg");
+        m.textContent = text;
+        m.style.display = "block";
+        m.style.color = ok ? "var(--ok)" : "var(--bad)";
+      }
+
+      async function api(path, opts) {
+        const r = await fetch(path, opts);
+        if (r.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || "request_failed");
+        return j;
+      }
+
+      function userRow(u) {
+        return `
+          <div class="ci" style="border-bottom: 1px solid var(--bd); align-items: flex-start">
+            <div class="ci-emo" aria-hidden="true">👤</div>
+            <div class="ci-info">
+              <div class="ci-name">${u.name} <span style="color:var(--tx3); font-weight:800">(${u.role})</span></div>
+              <div class="ci-price">${u.email}</div>
+              <div style="display:flex; gap:8px; flex-wrap: wrap; margin-top: 8px">
+                <button class="promo-btn" type="button" data-act="role" data-id="${u.id}">Đổi role</button>
+                <button class="promo-btn" type="button" data-act="reset" data-id="${u.id}">Reset pass</button>
+                <button class="promo-btn" type="button" data-act="del" data-id="${u.id}" style="border-color: rgba(192,57,43,.35); color: var(--bad)">Xóa</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      async function load() {
+        const j = await api("/api/admin/users");
+        el("count").textContent = `${j.users.length} users`;
+        el("list").innerHTML = j.users.map(userRow).join("");
+      }
+
+      async function createUser() {
+        const email = el("c_email").value.trim();
+        const name = el("c_name").value.trim();
+        const role = el("c_role").value;
+        const password = el("c_pass").value;
+        el("createBtn").disabled = true;
+        try {
+          await api("/api/admin/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, name, role, password }),
+          });
+          showMsg("Tạo user thành công.", true);
+          el("c_email").value = "";
+          el("c_name").value = "";
+          el("c_pass").value = "";
+          await load();
+        } catch (e) {
+          showMsg("Tạo user thất bại (email có thể đã tồn tại).", false);
+        } finally {
+          el("createBtn").disabled = false;
+        }
+      }
+
+      async function logout() {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.href = "/login.html";
+      }
+
+      el("createBtn").addEventListener("click", createUser);
+      el("refreshBtn").addEventListener("click", load);
+      el("logoutBtn").addEventListener("click", logout);
+
+      el("list").addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-act][data-id]");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const act = btn.dataset.act;
+        if (act === "del") {
+          if (!confirm("Xóa user này?")) return;
+          await api("/api/admin/users/" + id, { method: "DELETE" });
+          return load();
+        }
+        if (act === "role") {
+          const role = prompt("Nhập role (admin/user):", "user");
+          if (!role) return;
+          await api("/api/admin/users/" + id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ role }),
+          });
+          return load();
+        }
+        if (act === "reset") {
+          const password = prompt("Nhập mật khẩu mới (>=4):", "");
+          if (!password) return;
+          await api("/api/admin/users/" + id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password }),
+          });
+          alert("Đã reset mật khẩu.");
+          return;
+        }
+      });
+
+      (async () => {
+        try {
+          const me = await api("/api/auth/me");
+          if (me.user.role !== "admin") window.location.href = "/";
+          await load();
+        } catch {
+          window.location.href = "/login.html";
+        }
+      })();
+
+      // responsive tweak
+      if (window.matchMedia("(max-width: 980px)").matches) {
+        document.getElementById("grid").style.gridTemplateColumns = "1fr";
+      }
+    </script>
+  </body>
+</html>
+

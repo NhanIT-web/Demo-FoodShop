@@ -1,0 +1,108 @@
+{
+  "products": [
+    {
+      "id": "p_42a952fae017075e",
+      "cat": "com",
+      "name": "Cơm gà chiên mắm",
+      "price": 35000,
+      "orig": 40000,
+      "emoji": "🍽️",
+      "tag": "hot",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Thơm ngon",
+      "imageUrl": "/uploads/p_1775620867999_f7c0a65db788.jfif"
+    },
+    {
+      "id": "p_92d33ce87d49c9c4",
+      "cat": "mi",
+      "name": "Phở bò",
+      "price": 40000,
+      "orig": null,
+      "emoji": "🍽️",
+      "tag": "hot",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Bùng nổ vị giác",
+      "imageUrl": "/uploads/p_1775620788885_853786485a43.jpg"
+    },
+    {
+      "id": "p_780c9326847c1d96",
+      "cat": "drink",
+      "name": "Trà trái cây",
+      "price": 30000,
+      "orig": 35000,
+      "emoji": "🍽️",
+      "tag": "new",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Mát lạnh, sảng khoái",
+      "imageUrl": "/uploads/p_1775620006420_04a421d9f43a.jpg"
+    },
+    {
+      "id": "p_9122b97909080ded",
+      "cat": "pizza",
+      "name": "Pizza",
+      "price": 80000,
+      "orig": 100000,
+      "emoji": "🍽️",
+      "tag": "sale",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Pizza đặc biệt",
+      "imageUrl": "/uploads/p_1775619499284_04411b036d8d.jpg"
+    },
+    {
+      "id": "p_c433ab00c118f858",
+      "cat": "burger",
+      "name": "Bánh mỳ pewpew",
+      "price": 30000,
+      "orig": 40000,
+      "emoji": "🍽️",
+      "tag": "sale",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Ghé đến mua bánh mỳ cùng pewpew nào",
+      "imageUrl": "/uploads/p_1775619285899_5eae8cf930fd.png"
+    },
+    {
+      "id": "p_1cc62ca0abe8c691",
+      "cat": "snack",
+      "name": "Khô gà",
+      "price": 90000,
+      "orig": 100000,
+      "emoji": "🍽️",
+      "tag": "hot",
+      "rating": 4.5,
+      "sold": 0,
+      "desc": "Khô gà mixi thơm ngon",
+      "imageUrl": "/uploads/p_1775619044475_9e473becc509.jfif"
+    },
+    {
+      "id": "p_1",
+      "cat": "burger",
+      "name": "Burger Bò Phô Mai",
+      "price": 65000,
+      "orig": 75000,
+      "emoji": "🍔",
+      "tag": "hot",
+      "rating": 4.9,
+      "sold": 342,
+      "desc": "Bò Mỹ 100g, phô mai Cheddar, sốt BBQ",
+      "imageUrl": "/uploads/p_1775619597052_2ef510889152.png"
+    },
+    {
+      "id": "p_2",
+      "cat": "burger",
+      "name": "Burger Gà Giòn",
+      "price": 55000,
+      "orig": null,
+      "emoji": "🍔",
+      "tag": "new",
+      "rating": 4.7,
+      "sold": 128,
+      "desc": "Gà chiên giòn, bơ tươi, rau sống",
+      "imageUrl": "/uploads/p_1775619601756_ab6e5acdebf5.jpg"
+    }
+  ]
+}

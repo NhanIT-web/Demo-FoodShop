@@ -1,0 +1,10 @@
+food-shop/node_modules/
+
+# Avoid pushing personal / operational data to public GitHub
+food-shop/data/users.json
+food-shop/data/orders.json
+
+# (Optional) uploads are kept so product images referenced by products.json can render.
+# If you prefer to exclude images, you can uncomment the next line:
+# food-shop/uploads/
+

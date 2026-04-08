@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập • Food Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      .tab-bar {
+        display: flex;
+        gap: 0;
+        border-bottom: 1.5px solid var(--bd, #e0e0e0);
+        margin-bottom: 1.25rem;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 0.6rem 0;
+        background: none;
+        border: none;
+        border-bottom: 2.5px solid transparent;
+        margin-bottom: -1.5px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--tx3, #aaa);
+        cursor: pointer;
+        transition: color 0.15s, border-color 0.15s;
+      }
+      .tab-btn:hover { color: var(--tx2, #666); }
+      .tab-btn.active {
+        color: var(--or, #E8621A);
+        border-bottom-color: var(--or, #E8621A);
+      }
+
+      .panel { display: none; }
+      .panel.active { display: block; }
+
+      .strength-bar {
+        height: 4px;
+        border-radius: 999px;
+        background: var(--bd, #e0e0e0);
+        margin-top: 6px;
+        overflow: hidden;
+      }
+      .strength-fill {
+        height: 100%;
+        border-radius: 999px;
+        width: 0%;
+        transition: width 0.25s, background 0.25s;
+      }
+      .strength-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-top: 3px;
+        color: var(--tx3, #aaa);
+      }
+
+      .success-box {
+        display: none;
+        text-align: center;
+        padding: 1.5rem 0.5rem;
+      }
+      .success-box .s-ico { font-size: 2.8rem; margin-bottom: 0.5rem; }
+      .success-box .s-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        color: var(--br, #2D1600);
+        margin-bottom: 0.4rem;
+      }
+      .success-box .s-sub {
+        font-size: 0.82rem;
+        color: var(--tx2, #666);
+        line-height: 1.6;
+        margin-bottom: 1.1rem;
+      }
+
+      .dev-hint {
+        margin-top: 0.85rem;
+        padding: 0.75rem 0.9rem;
+        background: var(--bg2, #f5f5f5);
+        border-radius: 10px;
+        border: 0.5px solid var(--bd, #e0e0e0);
+        color: var(--tx3, #aaa);
+        font-weight: 800;
+        font-size: 0.8rem;
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="shell">
+      <header id="nav">
+        <div class="nav-i">
+          <a class="brand" href="./" aria-label="Trang chủ">
+            <div class="brand-ico" aria-hidden="true">🍜</div>
+            <span class="brand-name">Bếp <span>Nhà</span></span>
+          </a>
+          <div class="nav-acts">
+            <a class="nav-btn" href="./" style="display:inline-flex">← Quay lại</a>
+          </div>
+        </div>
+      </header>
+
+      <main style="max-width:520px; margin:0 auto; padding:1.25rem">
+        <section class="modal-card" style="max-width:none; margin-top:1.25rem; text-align:left">
+
+          <div class="tab-bar" role="tablist">
+            <button class="tab-btn active" id="tab-login" role="tab"
+                    aria-selected="true" aria-controls="panel-login"
+                    onclick="switchTab('login')">
+              🔑 Đăng nhập
+            </button>
+            <button class="tab-btn" id="tab-register" role="tab"
+                    aria-selected="false" aria-controls="panel-register"
+                    onclick="switchTab('register')">
+              📝 Đăng ký
+            </button>
+          </div>
+
+          <!-- ĐĂNG NHẬP -->
+          <div class="panel active" id="panel-login" role="tabpanel">
+            <div class="fg">
+              <label for="l_email">Email</label>
+              <input id="l_email" type="email" placeholder="admin@local" autocomplete="username" />
+            </div>
+            <div class="fg">
+              <label for="l_password">Mật khẩu</label>
+              <input id="l_password" type="password" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+
+            <div id="l_err" style="display:none; color:var(--bad); font-weight:900; margin:0.5rem 0"></div>
+            <button class="btn-checkout" id="loginBtn" type="button">Đăng nhập →</button>
+
+            <div class="dev-hint">
+              Mặc định dev:<br />
+              — Admin: <b>admin@local</b> / <b>admin123</b><br />
+              — User: <b>user@local</b> / <b>user123</b><br />
+              (đổi qua biến môi trường <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code>,
+              <code>USER_EMAIL</code>, <code>USER_PASSWORD</code>)
+            </div>
+          </div>
+
+          <!-- ĐĂNG KÝ USER -->
+          <div class="panel" id="panel-register" role="tabpanel">
+            <div id="registerForm">
+              <div class="fg">
+                <label for="r_name">Họ tên</label>
+                <input id="r_name" type="text" placeholder="Nguyễn Văn A" autocomplete="name" />
+              </div>
+              <div class="fg">
+                <label for="r_email">Email</label>
+                <input id="r_email" type="email" placeholder="example@email.com" autocomplete="username" />
+              </div>
+              <div class="fg">
+                <label for="r_phone">Số điện thoại</label>
+                <input id="r_phone" type="tel" placeholder="0901234567" autocomplete="tel" />
+              </div>
+              <div class="fg">
+                <label for="r_password">Mật khẩu</label>
+                <input id="r_password" type="password" placeholder="Tối thiểu 6 ký tự"
+                       autocomplete="new-password" oninput="checkStrength(this.value)" />
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                <div class="strength-label" id="strengthLabel"></div>
+              </div>
+              <div class="fg">
+                <label for="r_confirm">Xác nhận mật khẩu</label>
+                <input id="r_confirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+              </div>
+
+              <div id="r_err" style="display:none; color:var(--bad); font-weight:900; margin:0.5rem 0"></div>
+              <button class="btn-checkout" id="registerBtn" type="button">Tạo tài khoản →</button>
+
+              <div style="margin-top:0.75rem; text-align:center; font-size:0.8rem; color:var(--tx3); font-weight:700">
+                Đã có tài khoản?
+                <button type="button"
+                        style="background:none; border:none; color:var(--or); font-weight:800; font-size:0.8rem; cursor:pointer; font-family:'Nunito',sans-serif; padding:0"
+                        onclick="switchTab('login')">Đăng nhập ngay</button>
+              </div>
+            </div>
+
+            <div class="success-box" id="registerSuccess">
+              <div class="s-ico">🎉</div>
+              <div class="s-title">Đăng ký thành công!</div>
+              <div class="s-sub" id="successMsg"></div>
+              <button class="btn-checkout" style="max-width:220px; margin:0 auto"
+                      onclick="switchTab('login')">Đăng nhập ngay →</button>
+            </div>
+          </div>
+
+        </section>
+      </main>
+    </div>
+
+    <script>
+      function switchTab(tab) {
+        ['login', 'register'].forEach((t) => {
+          document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+          document.getElementById('tab-' + t).setAttribute('aria-selected', t === tab);
+          document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+        });
+        clearErrors();
+      }
+
+      function clearErrors() {
+        ['l_err', 'r_err'].forEach((id) => {
+          const el = document.getElementById(id);
+          el.style.display = 'none';
+          el.textContent = '';
+        });
+      }
+
+      function showErr(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.style.display = 'block';
+      }
+
+      function checkStrength(val) {
+        const fill  = document.getElementById('strengthFill');
+        const label = document.getElementById('strengthLabel');
+        let score = 0;
+        if (val.length >= 6)  score++;
+        if (val.length >= 10) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        const levels = [
+          { w: '0%',   c: 'transparent', t: '' },
+          { w: '25%',  c: '#E24B4A',     t: 'Rất yếu' },
+          { w: '45%',  c: '#EF9F27',     t: 'Yếu' },
+          { w: '65%',  c: '#BA7517',     t: 'Trung bình' },
+          { w: '85%',  c: '#3B6D11',     t: 'Mạnh' },
+          { w: '100%', c: '#1D9E75',     t: 'Rất mạnh' },
+        ];
+        const lv = levels[Math.min(score, 5)];
+        fill.style.width      = val.length ? lv.w : '0%';
+        fill.style.background = lv.c;
+        label.textContent     = val.length ? lv.t : '';
+        label.style.color     = lv.c;
+      }
+
+      function validateEmail(e) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+      }
+
+      function validatePhone(p) {
+        return /^(0|\+84)[0-9]{8,10}$/.test(p.replace(/\s/g, ''));
+      }
+
+      async function login() {
+        const email    = document.getElementById('l_email').value.trim();
+        const password = document.getElementById('l_password').value;
+        document.getElementById('l_err').style.display = 'none';
+
+        if (!email || !password) {
+          showErr('l_err', 'Vui lòng nhập đầy đủ email và mật khẩu.');
+          return;
+        }
+
+        const btn = document.getElementById('loginBtn');
+        btn.disabled = true;
+        btn.textContent = 'Đang đăng nhập…';
+
+        try {
+          const r = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(j.error || 'login_failed');
+
+          if (j.user?.role === 'admin') window.location.href = '/admin.html';
+          else window.location.href = '/';
+        } catch {
+          showErr('l_err', 'Đăng nhập thất bại. Kiểm tra lại email / mật khẩu.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Đăng nhập →';
+        }
+      }
+
+      async function register() {
+        const name     = document.getElementById('r_name').value.trim();
+        const email    = document.getElementById('r_email').value.trim();
+        const phone    = document.getElementById('r_phone').value.trim();
+        const password = document.getElementById('r_password').value;
+        const confirm  = document.getElementById('r_confirm').value;
+        document.getElementById('r_err').style.display = 'none';
+
+        if (!name) {
+          showErr('r_err', 'Vui lòng nhập họ tên.');
+          return;
+        }
+        if (!validateEmail(email)) {
+          showErr('r_err', 'Email không hợp lệ.');
+          return;
+        }
+        if (phone && !validatePhone(phone)) {
+          showErr('r_err', 'Số điện thoại không hợp lệ (VD: 0901234567).');
+          return;
+        }
+        if (password.length < 6) {
+          showErr('r_err', 'Mật khẩu phải có ít nhất 6 ký tự.');
+          return;
+        }
+        if (password !== confirm) {
+          showErr('r_err', 'Mật khẩu xác nhận không khớp.');
+          return;
+        }
+
+        const btn = document.getElementById('registerBtn');
+        btn.disabled = true;
+        btn.textContent = 'Đang tạo tài khoản…';
+
+        try {
+          const r = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              email,
+              phone,
+              password,
+              role: 'user'   // chỉ cho user
+            }),
+          });
+
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(j.error || 'register_failed');
+
+          document.getElementById('registerForm').style.display = 'none';
+          document.getElementById('registerSuccess').style.display = 'block';
+          document.getElementById('successMsg').innerHTML =
+            `Chào mừng <b>${name}</b>!<br>Tài khoản đã được tạo với email <b>${email}</b>.<br>Đăng nhập để bắt đầu mua sắm nhé.`;
+        } catch (e) {
+          const msg = e.message === 'email_exists'
+            ? 'Email này đã được đăng ký. Vui lòng dùng email khác.'
+            : 'Đăng ký thất bại. Vui lòng thử lại.';
+          showErr('r_err', msg);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Tạo tài khoản →';
+        }
+      }
+
+      document.getElementById('loginBtn').addEventListener('click', login);
+      document.getElementById('registerBtn').addEventListener('click', register);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const loginActive = document.getElementById('panel-login').classList.contains('active');
+        if (loginActive) login();
+        else register();
+      });
+    </script>
+  </body>
+</html>

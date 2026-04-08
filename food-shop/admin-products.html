@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin • Sản phẩm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+ 
+    <!-- Inline styles chỉ cho trang admin này -->
+    <style>
+      /* ── Edit modal overlay ── */
+      #editOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      #editOverlay.open { display: flex; }
+ 
+      #editModal {
+        background: var(--bg, #fff);
+        border-radius: 16px;
+        border: 0.5px solid var(--bd, #e0e0e0);
+        padding: 1.75rem 2rem;
+        width: 100%;
+        max-width: 460px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+ 
+      #editModal .form-title { margin-bottom: 1rem; }
+ 
+      #editModal .fg { margin-bottom: 0.65rem; }
+      #editModal .fg label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--tx2, #666);
+        margin-bottom: 0.28rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      #editModal .fg input,
+      #editModal .fg select {
+        width: 100%;
+        padding: 0.48rem 0.7rem;
+        border: 0.5px solid var(--bd2, #ccc);
+        border-radius: 8px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.85rem;
+        background: var(--bg2, #f9f9f9);
+        color: var(--tx, #111);
+        outline: none;
+        transition: border 0.18s;
+      }
+      #editModal .fg input:focus,
+      #editModal .fg select:focus { border-color: var(--or, #E8621A); }
+ 
+      .modal-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 1rem;
+      }
+      .btn-save {
+        flex: 1;
+        padding: 0.68rem;
+        background: var(--or, #E8621A);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-save:hover { background: var(--or2, #FF8C42); }
+      .btn-cancel {
+        padding: 0.68rem 1.2rem;
+        background: none;
+        border: 0.5px solid var(--bd2, #ccc);
+        border-radius: 10px;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--tx2, #666);
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-cancel:hover { background: var(--bg2, #f9f9f9); }
+ 
+      /* Tag badge trong danh sách */
+      .tag-badge {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .tag-hot  { background: #fff0e8; color: #993C1D; }
+      .tag-new  { background: #e8f5e9; color: #27500a; }
+      .tag-sale { background: #fff3cd; color: #633806; }
+    </style>
+  </head>
+ 
+  <body>
+    <div id="shell">
+      <header id="nav">
+        <div class="nav-i">
+          <a class="brand" href="./" aria-label="Trang chủ">
+            <div class="brand-ico" aria-hidden="true">🧺</div>
+            <span class="brand-name">Admin <span>Products</span></span>
+          </a>
+          <div class="nav-acts">
+            <a class="nav-btn" href="./admin.html"        style="display:inline-flex">👥 Users</a>
+            <a class="nav-btn" href="./admin-orders.html" style="display:inline-flex">🧾 Đơn hàng</a>
+            <a class="nav-btn" href="./"                  style="display:inline-flex">← Shop</a>
+            <button class="nav-btn" id="logoutBtn" type="button">Đăng xuất</button>
+          </div>
+        </div>
+      </header>
+ 
+      <main style="max-width:1200px; margin:0 auto; padding:1.25rem">
+ 
+        <section class="hero-i" style="padding:1rem 1.1rem; align-items:center">
+          <div class="hero-text">
+            <h1 style="font-size:1.5rem">Quản lý sản phẩm</h1>
+            <p>Admin có thể thêm / xóa / chỉnh sửa và thay ảnh sản phẩm.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+            <button class="cat-btn active" id="refreshBtn" type="button">Tải lại</button>
+          </div>
+        </section>
+ 
+        <section style="display:grid; grid-template-columns:1fr 440px; gap:1rem; margin-top:1rem" id="grid">
+ 
+          <!-- ── Danh sách sản phẩm ── -->
+          <div class="modal-card" style="max-width:none; text-align:left">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+              <div class="form-title">🧾 Danh sách sản phẩm</div>
+              <div style="color:var(--tx3); font-weight:900" id="count"></div>
+            </div>
+            <div id="list" style="margin-top:0.5rem"></div>
+          </div>
+ 
+          <!-- ── Form thêm sản phẩm ── -->
+          <div class="modal-card" style="max-width:none; text-align:left">
+            <div class="form-title">➕ Thêm sản phẩm</div>
+ 
+            <div class="fg">
+              <label for="c_name">Tên</label>
+              <input id="c_name" type="text" placeholder="Pizza Hải Sản" />
+            </div>
+ 
+            <!-- Danh mục: SELECT thay vì text input -->
+            <div class="fg">
+              <label for="c_cat">Danh mục</label>
+              <select id="c_cat">
+                <option value="">— Chọn danh mục —</option>
+                <option value="burger">🍔 Burger</option>
+                <option value="pizza">🍕 Pizza</option>
+                <option value="com">🍗 Cơm</option>
+                <option value="mi">🍜 Mì &amp; Phở</option>
+                <option value="snack">🥗 Khai vị</option>
+                <option value="drink">🧋 Đồ uống</option>
+              </select>
+            </div>
+ 
+            <div class="fg">
+              <label for="c_price">Giá</label>
+              <input id="c_price" type="number" placeholder="95000" />
+            </div>
+            <div class="fg">
+              <label for="c_orig">Giá gốc (tuỳ chọn)</label>
+              <input id="c_orig" type="number" placeholder="115000" />
+            </div>
+            <div class="fg">
+              <label for="c_emoji">Emoji</label>
+              <input id="c_emoji" type="text" placeholder="🍕" />
+            </div>
+ 
+            <!-- Tag: SELECT -->
+            <div class="fg">
+              <label for="c_tag">Tag</label>
+              <select id="c_tag">
+                <option value="">— Không có tag —</option>
+                <option value="hot">🔥 Hot</option>
+                <option value="new">✨ Mới</option>
+                <option value="sale">🏷️ Sale</option>
+              </select>
+            </div>
+ 
+            <div class="fg">
+              <label for="c_desc">Mô tả</label>
+              <input id="c_desc" type="text" placeholder="Mực, tôm, phô mai..." />
+            </div>
+
+            <div class="fg">
+              <label for="c_imageUrl">Link hình ảnh (tuỳ chọn)</label>
+              <input id="c_imageUrl" type="url" placeholder="https://... hoặc /uploads/..." />
+            </div>
+ 
+            <div id="msg" style="display:none; margin:0.5rem 0; font-weight:900"></div>
+            <button class="btn-checkout" id="createBtn" type="button">Tạo sản phẩm →</button>
+          </div>
+ 
+        </section>
+      </main>
+    </div>
+ 
+    <!-- ══════════════════════════════════════
+         Edit Modal (thay thế prompt() )
+    ══════════════════════════════════════ -->
+    <div id="editOverlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div id="editModal">
+        <div class="form-title" id="editModalTitle">✏️ Chỉnh sửa sản phẩm</div>
+ 
+        <input type="hidden" id="e_id" />
+ 
+        <div class="fg">
+          <label for="e_name">Tên sản phẩm</label>
+          <input id="e_name" type="text" placeholder="Tên món ăn" />
+        </div>
+ 
+        <!-- Danh mục: SELECT (khớp trang chủ) -->
+        <div class="fg">
+          <label for="e_cat">Danh mục</label>
+          <select id="e_cat">
+            <option value="">— Chọn danh mục —</option>
+            <option value="burger">🍔 Burger</option>
+            <option value="pizza">🍕 Pizza</option>
+            <option value="com">🍗 Cơm</option>
+            <option value="mi">🍜 Mì &amp; Phở</option>
+            <option value="snack">🥗 Khai vị</option>
+            <option value="drink">🧋 Đồ uống</option>
+          </select>
+        </div>
+ 
+        <div class="fg">
+          <label for="e_price">Giá (đ)</label>
+          <input id="e_price" type="number" placeholder="95000" />
+        </div>
+        <div class="fg">
+          <label for="e_orig">Giá gốc — để trống = không có</label>
+          <input id="e_orig" type="number" placeholder="115000" />
+        </div>
+        <div class="fg">
+          <label for="e_emoji">Emoji</label>
+          <input id="e_emoji" type="text" placeholder="🍕" />
+        </div>
+ 
+        <!-- Tag: SELECT -->
+        <div class="fg">
+          <label for="e_tag">Tag</label>
+          <select id="e_tag">
+            <option value="">— Không có tag —</option>
+            <option value="hot">🔥 Hot</option>
+            <option value="new">✨ Mới</option>
+            <option value="sale">🏷️ Sale</option>
+          </select>
+        </div>
+ 
+        <div class="fg">
+          <label for="e_desc">Mô tả</label>
+          <input id="e_desc" type="text" placeholder="Mực, tôm, phô mai..." />
+        </div>
+
+        <div class="fg">
+          <label for="e_imageUrl">Link hình ảnh (tuỳ chọn)</label>
+          <input id="e_imageUrl" type="url" placeholder="https://... hoặc /uploads/..." />
+        </div>
+ 
+        <div id="editMsg" style="display:none; margin:0.4rem 0; font-size:0.82rem; font-weight:700"></div>
+ 
+        <div class="modal-actions">
+          <button class="btn-save" id="saveEditBtn" type="button">Lưu thay đổi</button>
+          <button class="btn-cancel" id="cancelEditBtn" type="button">Huỷ</button>
+        </div>
+      </div>
+    </div>
+ 
+    <script>
+      const el = (id) => document.getElementById(id);
+      let products = [];
+ 
+      /* ── Danh mục label (dùng khi render list) ── */
+      const CAT_LABEL = {
+        burger : '🍔 Burger',
+        pizza  : '🍕 Pizza',
+        com    : '🍗 Cơm',
+        mi     : '🍜 Mì & Phở',
+        snack  : '🥗 Khai vị',
+        drink  : '🧋 Đồ uống',
+      };
+      const TAG_LABEL = { hot: '🔥 Hot', new: '✨ Mới', sale: '🏷️ Sale' };
+ 
+      /* ── Helpers ── */
+      function showMsg(text, ok) {
+        const m = el('msg');
+        m.textContent = text;
+        m.style.display = 'block';
+        m.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+      }
+ 
+      function showEditMsg(text, ok) {
+        const m = el('editMsg');
+        m.textContent = text;
+        m.style.display = 'block';
+        m.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+      }
+ 
+      async function api(path, opts) {
+        const r = await fetch(path, opts);
+        if (r.status === 401) { window.location.href = '/login.html'; return; }
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || 'request_failed');
+        return j;
+      }
+ 
+      function money(n) {
+        return Math.round(Number(n) || 0).toLocaleString('vi-VN') + 'đ';
+      }
+ 
+      /* ── Render một hàng sản phẩm ── */
+      function row(p) {
+        const img = p.imageUrl
+          ? `<img src="${p.imageUrl}" alt=""
+                 style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:1px solid var(--bd)" />`
+          : `<div class="ci-emo" aria-hidden="true">${p.emoji || '🍽️'}</div>`;
+ 
+        const tagHtml = p.tag && TAG_LABEL[p.tag]
+          ? `<span class="tag-badge tag-${p.tag}">${TAG_LABEL[p.tag]}</span>` : '';
+ 
+        return `
+          <div class="ci" style="border-bottom:1px solid var(--bd); align-items:flex-start">
+            <div style="width:44px; flex-shrink:0; display:grid; place-items:center">${img}</div>
+            <div class="ci-info">
+              <div class="ci-name">
+                ${p.name}
+                <span style="color:var(--tx3); font-weight:800">(${CAT_LABEL[p.cat] || p.cat})</span>
+                ${tagHtml}
+              </div>
+              <div class="ci-price">
+                ${money(p.price)}
+                ${p.orig
+                  ? `<span style="color:var(--tx3);text-decoration:line-through;font-weight:800;margin-left:6px">${money(p.orig)}</span>`
+                  : ''}
+              </div>
+              <div style="margin-top:6px; color:var(--tx2); font-weight:800; line-height:1.55">${p.desc || ''}</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center">
+                <button class="promo-btn" type="button" data-act="edit" data-id="${p.id}">✏️ Sửa</button>
+                <label class="promo-btn" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer">
+                  📷 Ảnh…
+                  <input type="file" accept="image/png,image/jpeg,image/webp"
+                         data-act="img" data-id="${p.id}" style="display:none" />
+                </label>
+                <button class="promo-btn" type="button" data-act="del" data-id="${p.id}"
+                        style="border-color:rgba(192,57,43,.35); color:var(--bad)">🗑️ Xóa</button>
+              </div>
+            </div>
+          </div>`;
+      }
+ 
+      /* ── Load danh sách ── */
+      async function load() {
+        const j = await api('/api/admin/products');
+        products = j.products || [];
+        el('count').textContent = `${products.length} sản phẩm`;
+        el('list').innerHTML = products.map(row).join('');
+      }
+ 
+      /* ── Tạo sản phẩm mới ── */
+      async function createProduct() {
+        el('createBtn').disabled = true;
+        try {
+          const cat = el('c_cat').value;
+          if (!cat) { showMsg('Vui lòng chọn danh mục.', false); return; }
+          const body = {
+            name  : el('c_name').value.trim(),
+            cat,
+            price : Number(el('c_price').value),
+            orig  : el('c_orig').value ? Number(el('c_orig').value) : null,
+            emoji : el('c_emoji').value.trim(),
+            tag   : el('c_tag').value,
+            desc  : el('c_desc').value.trim(),
+            imageUrl: el('c_imageUrl').value.trim(),
+          };
+          await api('/api/admin/products', {
+            method  : 'POST',
+            headers : { 'Content-Type': 'application/json' },
+            body    : JSON.stringify(body),
+          });
+          showMsg('Tạo sản phẩm thành công.', true);
+          ['c_name','c_cat','c_price','c_orig','c_emoji','c_tag','c_desc','c_imageUrl']
+            .forEach((x) => { el(x).value = ''; });
+          await load();
+        } catch {
+          showMsg('Tạo sản phẩm thất bại. Kiểm tra dữ liệu.', false);
+        } finally {
+          el('createBtn').disabled = false;
+        }
+      }
+ 
+      /* ─────────────────────────────────────────────
+         EDIT MODAL — mở / lưu / đóng
+      ───────────────────────────────────────────── */
+      function openEditModal(p) {
+        el('e_id').value    = p.id;
+        el('e_name').value  = p.name;
+        el('e_cat').value   = p.cat;
+        el('e_price').value = p.price;
+        el('e_orig').value  = p.orig || '';
+        el('e_emoji').value = p.emoji || '';
+        el('e_tag').value   = p.tag  || '';
+        el('e_desc').value  = p.desc || '';
+        el('e_imageUrl').value = p.imageUrl || '';
+        el('editMsg').style.display = 'none';
+        el('editOverlay').classList.add('open');
+        el('e_name').focus();
+      }
+ 
+      function closeEditModal() {
+        el('editOverlay').classList.remove('open');
+      }
+ 
+      async function saveEdit() {
+        const id = el('e_id').value;
+        const cat = el('e_cat').value;
+        if (!cat) { showEditMsg('Vui lòng chọn danh mục.', false); return; }
+ 
+        el('saveEditBtn').disabled = true;
+        try {
+          const body = {
+            name  : el('e_name').value.trim(),
+            cat,
+            price : Number(el('e_price').value),
+            orig  : el('e_orig').value ? Number(el('e_orig').value) : null,
+            emoji : el('e_emoji').value.trim(),
+            tag   : el('e_tag').value,
+            desc  : el('e_desc').value.trim(),
+            imageUrl: el('e_imageUrl').value.trim(),
+          };
+          await api('/api/admin/products/' + id, {
+            method  : 'PATCH',
+            headers : { 'Content-Type': 'application/json' },
+            body    : JSON.stringify(body),
+          });
+          closeEditModal();
+          await load();
+        } catch {
+          showEditMsg('Lưu thất bại. Thử lại.', false);
+        } finally {
+          el('saveEditBtn').disabled = false;
+        }
+      }
+ 
+      /* ── Đóng overlay khi click ra ngoài modal ── */
+      el('editOverlay').addEventListener('click', (e) => {
+        if (e.target === el('editOverlay')) closeEditModal();
+      });
+      /* ── Đóng bằng phím Escape ── */
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeEditModal();
+      });
+ 
+      el('cancelEditBtn').addEventListener('click', closeEditModal);
+      el('saveEditBtn').addEventListener('click', saveEdit);
+ 
+      /* ── Logout ── */
+      async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+      }
+ 
+      el('refreshBtn').addEventListener('click', load);
+      el('createBtn').addEventListener('click', createProduct);
+      el('logoutBtn').addEventListener('click', logout);
+ 
+      /* ── Delegate click trong danh sách ── */
+      el('list').addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-act][data-id]') || e.target.closest('[data-act][data-id]');
+        if (!btn) return;
+        const id  = btn.dataset.id;
+        const act = btn.dataset.act;
+        const p   = products.find((x) => x.id === id);
+        if (!p) return;
+ 
+        if (act === 'del') {
+          if (!confirm(`Xóa sản phẩm "${p.name}"?`)) return;
+          await api('/api/admin/products/' + id, { method: 'DELETE' });
+          return load();
+        }
+ 
+        if (act === 'edit') {
+          openEditModal(p);   /* ← Mở modal thay vì prompt() */
+        }
+      });
+ 
+      /* ── Upload ảnh ── */
+      el('list').addEventListener('change', async (e) => {
+        const input = e.target.closest("input[type=file][data-act='img'][data-id]");
+        if (!input) return;
+        const id   = input.dataset.id;
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const fd = new FormData();
+        fd.append('image', file);
+        const r = await fetch('/api/admin/products/' + id + '/image', { method: 'POST', body: fd });
+        if (!r.ok) {
+          showMsg('Upload ảnh thất bại (định dạng PNG/JPG/WEBP, <=2MB).', false);
+          input.value = '';
+          return;
+        }
+        input.value = '';
+        await load();
+      });
+ 
+      /* ── Khởi động ── */
+      (async () => {
+        try {
+          const me = await api('/api/auth/me');
+          if (me.user.role !== 'admin') window.location.href = '/';
+          await load();
+        } catch {
+          window.location.href = '/login.html';
+        }
+      })();
+ 
+      if (window.matchMedia('(max-width: 980px)').matches) {
+        document.getElementById('grid').style.gridTemplateColumns = '1fr';
+      }
+    </script>
+  </body>
+</html>

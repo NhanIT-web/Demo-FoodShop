@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Install
+        working-directory: food-shop
+        run: npm install
+      - name: Lint (node syntax)
+        working-directory: food-shop
+        run: node --check server.js && node --check app.js
+      - name: Smoke test (static)
+        working-directory: food-shop
+        run: node -e "require('fs').accessSync('index.html'); require('fs').accessSync('style.css'); require('fs').accessSync('app.js'); console.log('ok')"
+      - name: Docker build
+        working-directory: food-shop
+        run: docker build -t food-shop:ci .
+
